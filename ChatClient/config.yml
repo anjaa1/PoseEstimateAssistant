@@ -1,0 +1,2 @@
+api_url: "http://localhost:5005/webhooks/rest/webhook"
+username: "test_user"
