@@ -1,7 +1,8 @@
 import json
 
 import requests
-from ConfigReader import ConfigReader
+
+from ChatClient.ConfigReader import ConfigReader
 
 
 class RasaClient:
@@ -27,5 +28,4 @@ class RasaClient:
             else:
                 return "Es konnte keine Verbindung mit Rasa hergestellt werden"
         except requests.exceptions.RequestException as e:
-            return f"Anfrage an Rasa konnte nicht verarbeitet werden: {e}"
-    
+            return f"Anfrage an Rasa konnte nicht verarbeitet werden: {e}"  
