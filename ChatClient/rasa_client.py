@@ -11,9 +11,6 @@ class RasaClient:
         self.rasa_url = self.config['api_url']
         self.rasa_user = self.config['username']
 
-        print(self.rasa_url)
-        print(self.rasa_user)
-
     def send_message(self, message):
         payload = {
             "sender": self.rasa_user,
