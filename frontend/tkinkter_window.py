@@ -6,21 +6,16 @@ import cv2
 import mediapipe as mp
 from PIL import Image, ImageTk
 
-# Einbinden der anderen Python-Klassen
-import os
-import sys
-# Relative Pfadangaben haben nicht funktioniert, daher absolute Pfadangaben mit os und sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../PoseEstimation')))
-from PoseEstimation import PoseEstimation
 
 class LandmarkDetectorApp:
 
     pose_score = 0
     time_correct_pose = 13
 
-    def __init__(self, master):
+    def __init__(self, master, poseEstimation_model):
         self.master = master
         self.master.title("Landmark Detector")
+        self.poseEstimation_model = poseEstimation_model
 
         # Main frame for the whole app
         self.main_frame = Frame(self.master, padx=20, pady=20)
@@ -70,9 +65,6 @@ class LandmarkDetectorApp:
         self.stop_button = tk.Button(self.left_frame, text="Stop", command=self.stop_detection, state=tk.DISABLED)
         self.stop_button.pack()
 
-        self.mp_pose = mp.solutions.pose
-        self.pose = self.mp_pose.Pose()
-
         self.cap = cv2.VideoCapture(0)
         self.detecting = False
         self.update()
@@ -119,8 +111,7 @@ class LandmarkDetectorApp:
             raise "Camera Error: "
             
         if self.detecting:
-            video_stream = PoseEstimation(self.mp_pose, self.pose, self.cap, video, True) # PoseEstimation Objekt anlegen und initialisieren
-            video, temp_goodtime, temp_badtime, self.aligned = video_stream(self.cap, video) # Start
+            video, temp_goodtime, temp_badtime, self.aligned = self.poseEstimation_model(self.cap, video) # Start
             self.time_correct_pose += temp_goodtime
             self.time_incorrect_pose += temp_badtime
         
@@ -176,16 +167,3 @@ class LandmarkDetectorApp:
         self.detecting = False
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
-
-def main():
-    try:
-        root = tk.Tk()
-        app = LandmarkDetectorApp(root)
-        root.mainloop()
-    except Exception as e:
-        print("An error occurred:")
-        print(e)
-        print(traceback.format_exc())
-
-if __name__ == "__main__":
-    main()

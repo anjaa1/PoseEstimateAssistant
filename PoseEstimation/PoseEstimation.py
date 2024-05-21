@@ -1,29 +1,27 @@
 # Importieren der benötigten Bibliotheken
-import cv2
-import time
 import math as m
+import time
+
+import cv2
 import mediapipe as mp
 from PIL import Image, ImageTk
+
 
 class PoseEstimation:
 
     # Variablen der Klasse PoseEstimation intialisieren
-    def __init__(self, mp_pose, pose, captureObject = False, video = False, automode = False):
+    def __init__(self, captureObject = False, automode = False):
         # Frame-Zähler initialisieren
         self.good_frames = 0
         self.bad_frames = 0
         self.bad_time = 0
         self.good_time = 0
         self.font = cv2.FONT_HERSHEY_SIMPLEX
-        self.mp_pose = mp_pose
-        self.pose = pose
+        self.mp_pose = mp.solutions.pose
+        self.pose = self.mp_pose.Pose()
         self.error = ""
-        if not automode:
-            self.videoFeed()
-        else:
-            self.captureObject = captureObject
-            self.video = video
-            #self.videoFeedForHMI(captureObject, video)
+        self.captureObject = captureObject
+        #self.videoFeedForHMI(captureObject, video)
 
     def __call__(self, captureObject, video):
         return self.videoFeedForHMI(captureObject, video)
