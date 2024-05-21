@@ -127,16 +127,3 @@ class LandmarkDetectorApp:
         self.detecting = False
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
-
-def main():
-    try:
-        root = tk.Tk()
-        app = LandmarkDetectorApp(root)
-        root.mainloop()
-    except Exception as e:
-        print("An error occurred:")
-        print(e)
-        print(traceback.format_exc())
-
-if __name__ == "__main__":
-    main()
