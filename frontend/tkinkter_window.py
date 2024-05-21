@@ -12,9 +12,10 @@ class LandmarkDetectorApp:
     pose_score = 0
     time_correct_pose = 13
 
-    def __init__(self, master):
+    def __init__(self, master, poseEstimation_model):
         self.master = master
         self.master.title("Landmark Detector")
+        self.poseEstimation_model = poseEstimation_model
 
         # Main frame for the whole app
         self.main_frame = Frame(self.master, padx=20, pady=20)
@@ -27,6 +28,11 @@ class LandmarkDetectorApp:
          # Right frame for chatbot
         self.right_frame = Frame(self.main_frame, width=320)
         self.right_frame.pack(side=tk.RIGHT, fill='both', expand=False)
+
+        # Pose detection
+        self.time_correct_pose = 0
+        self.time_incorrect_pose = 0
+        self.aligned = False
 
         # KPI frame
         self.KPI_frame = Frame(self.left_frame)
@@ -41,8 +47,13 @@ class LandmarkDetectorApp:
         self.KPI_pose_score_label.config(borderwidth=2, relief="groove")
         self.KPI_pose_score_label.grid(row=0, column=1, sticky="nsew")  # Use sticky to expand label to fill the cell
 
+        self.KPI_pose_align_label = tk.Label(self.KPI_frame, text="Camera not aligned", fg = "red")
+        self.KPI_pose_align_label.config(borderwidth=2, relief="groove")
+        self.KPI_pose_align_label.grid(row=0, column=2, sticky="nsew")  # Use sticky to expand label to fill the cell
+
         self.KPI_frame.columnconfigure(0, weight=1)  # Make column 0 of the KPI frame expandable
         self.KPI_frame.columnconfigure(1, weight=1)  # Make column 1 of the KPI frame expandable
+        self.KPI_frame.columnconfigure(2, weight=1)  # Make column 2 of the KPI frame expandable
 
         self.canvas = tk.Canvas(self.left_frame, width=640, height=480)
         self.canvas.pack()
@@ -53,9 +64,6 @@ class LandmarkDetectorApp:
 
         self.stop_button = tk.Button(self.left_frame, text="Stop", command=self.stop_detection, state=tk.DISABLED)
         self.stop_button.pack()
-
-        self.mp_pose = mp.solutions.pose
-        self.pose = self.mp_pose.Pose()
 
         self.cap = cv2.VideoCapture(0)
         self.detecting = False
@@ -91,6 +99,37 @@ class LandmarkDetectorApp:
             self.entry.delete(0, tk.END)  # Clear the entry widget
 
     def update(self):
+        
+        # Variablen für Zeit
+        temp_goodtime = 0
+        temp_badtime = 0
+
+        success, video = self.cap.read()
+        if not success:
+            # Fehlermeldung in HMI?
+            print("Null.Frames")
+            raise "Camera Error: "
+            
+        if self.detecting:
+            video, temp_goodtime, temp_badtime, self.aligned = self.poseEstimation_model(self.cap, video) # Start
+            self.time_correct_pose += temp_goodtime
+            self.time_incorrect_pose += temp_badtime
+        
+        if self.aligned:
+            self.KPI_pose_align_label.config(text="Camera aligned", fg = "green") # Label aligned aktualisieren
+            self.KPI_pose_time_label.config(text=f"Correct Pose Time: {self.time_correct_pose}")
+        else:
+            self.KPI_pose_align_label.config(text="Camera not aligned", fg = "red") # Label aligned aktualisieren
+            self.KPI_pose_time_label.config(text=f"Incorrect Pose Time: {self.time_incorrect_pose}")
+
+        #img = Image.fromarray(video_stream(self.cap, video))
+        img = Image.fromarray(video)
+        imgtk = ImageTk.PhotoImage(image=img)
+        self.canvas.create_image(0, 0, anchor=tk.NW, image=imgtk)
+        self.photo = imgtk  # Keep a reference to avoid garbage collection
+        self.master.after(10, self.update)
+
+        """
         ret, frame = self.cap.read()
         if ret:
             frame = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
@@ -109,6 +148,7 @@ class LandmarkDetectorApp:
             self.canvas.create_image(0, 0, anchor=tk.NW, image=imgtk)
             self.photo = imgtk  # Keep a reference to avoid garbage collection
         self.master.after(10, self.update)
+        """
 
     def draw_landmarks(self, frame, landmarks):
         mp_drawing = mp.solutions.drawing_utils
