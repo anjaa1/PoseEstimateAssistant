@@ -5,6 +5,7 @@ from tkinter import Frame
 import cv2
 import mediapipe as mp
 from PIL import Image, ImageTk
+import math
 
 
 class LandmarkDetectorApp:
@@ -16,6 +17,9 @@ class LandmarkDetectorApp:
         self.master = master
         self.master.title("Landmark Detector")
         self.poseEstimation_model = poseEstimation_model
+
+        # Attributes for error-management
+        self.PoseError = False
 
         # Main frame for the whole app
         self.main_frame = Frame(self.master, padx=20, pady=20)
@@ -39,7 +43,7 @@ class LandmarkDetectorApp:
         self.KPI_frame.configure(background="black")
         self.KPI_frame.pack(fill=tk.X)  # Make the KPI frame as wide as the parent frame
 
-        self.KPI_pose_time_label = tk.Label(self.KPI_frame, text=f"Correct Pose Time: {self.time_correct_pose}")
+        self.KPI_pose_time_label = tk.Label(self.KPI_frame, text=f"Correct Pose Time: - Sekunden")
         self.KPI_pose_time_label.config(borderwidth=2, relief="groove")
         self.KPI_pose_time_label.grid(row=0, column=0, sticky="nsew")  # Use sticky to expand label to fill the cell
 
@@ -58,12 +62,23 @@ class LandmarkDetectorApp:
         self.canvas = tk.Canvas(self.left_frame, width=640, height=480)
         self.canvas.pack()
 
-        # Buttons for landmark detection
-        self.start_button = tk.Button(self.left_frame, text="Start", command=self.start_detection)
-        self.start_button.pack()
+        # Frame for Landmark detection
+        self.Landmark_frame = Frame(self.left_frame)
+        self.Landmark_frame.configure(background="black")
+        self.Landmark_frame.pack(fill=tk.X)
 
-        self.stop_button = tk.Button(self.left_frame, text="Stop", command=self.stop_detection, state=tk.DISABLED)
-        self.stop_button.pack()
+        self.start_button = tk.Button(self.Landmark_frame, text="Start", command=self.start_detection)
+        self.start_button.grid(row=0, column=0, padx=1, pady=1, sticky="ew")
+
+        self.stop_button = tk.Button(self.Landmark_frame, text="Stop", command=self.stop_detection, state=tk.DISABLED)
+        self.stop_button.grid(row=0, column=1, padx=1, pady=1, sticky="ew")
+
+        self.error_info_label = tk.Label(self.Landmark_frame, text= "No error detected. Everthing works correct!", borderwidth=2)
+        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=1, pady=1, sticky="ew")
+
+        self.Landmark_frame.columnconfigure(0, weight=1) # Make column 0 of the Landmark frame expandable
+        self.Landmark_frame.columnconfigure(1, weight=1) # Make column 1 of the Landmark frame expandable
+
 
         self.cap = cv2.VideoCapture(0)
         self.detecting = False
@@ -109,55 +124,56 @@ class LandmarkDetectorApp:
             # Fehlermeldung in HMI?
             print("Null.Frames")
             raise "Camera Error: "
-            
-        if self.detecting:
-            video, temp_goodtime, temp_badtime, self.aligned = self.poseEstimation_model(self.cap, video) # Start
-            self.time_correct_pose += temp_goodtime
-            self.time_incorrect_pose += temp_badtime
         
-        if self.aligned:
-            self.KPI_pose_align_label.config(text="Camera aligned", fg = "green") # Label aligned aktualisieren
-            self.KPI_pose_time_label.config(text=f"Correct Pose Time: {self.time_correct_pose}")
-        else:
-            self.KPI_pose_align_label.config(text="Camera not aligned", fg = "red") # Label aligned aktualisieren
-            self.KPI_pose_time_label.config(text=f"Incorrect Pose Time: {self.time_incorrect_pose}")
+        video = cv2.cvtColor(cv2.flip(video,1), cv2.COLOR_BGR2RGB)
+        
+        # Starte PoseEstimation, wenn Nutzer start geklickt hat
+        if self.detecting:
+            video, correctPose, temp_goodtime, temp_badtime, self.aligned, self.PoseError = self.poseEstimation_model(self.cap, video) # Start PoseEstimation
+            
+            # Wenn PoseEstimation ohne Fehler, dann...
+            if self.PoseError == False:
+                self.time_correct_pose += temp_goodtime
+                self.time_incorrect_pose += temp_badtime
+                self.error_info_label.config(text="Die Haltungserkennung funktioniert einwandfrei", fg= "green")
 
-        #img = Image.fromarray(video_stream(self.cap, video))
+                # Wenn Kamera korrekt seitlich ausgerichtet, dann...
+                if self.aligned:
+                    self.KPI_pose_align_label.config(text="Camera aligned", fg = "green") # Label aligned aktualisieren
+
+                    # Korrektheit der Haltung erfassen und Zeitlabel entsprechend aktualisieren
+                    if correctPose:
+                        self.KPI_pose_time_label.config(text=f"Correct Pose Time: {round(self.time_correct_pose)} Sekunden")
+                        print("Correct Posetime: ", self.time_correct_pose)
+                        self.time_incorrect_pose = 0
+                    else:
+                        self.KPI_pose_time_label.config(text=f"Incorrect Pose Time: {round(self.time_incorrect_pose)} Sekunden")
+                        print("Incorrect Posetime: ", self.time_incorrect_pose)
+                        self.time_correct_pose = 0
+                else:
+                    self.KPI_pose_align_label.config(text="Camera not aligned", fg = "red") # Label aligned aktualisieren
+                    self.KPI_pose_time_label.config(text=f"Correct Pose Time: - Sekunden")
+
+            # ... andernfalls Fehlermeldung ausgeben im dafür vorgesehenen Label
+            else:
+                self.error_info_label.config(text=self.PoseError, fg= "red")
+                self.stop_detection()
+        
+        # Transform video-stream to tk-image format
         img = Image.fromarray(video)
         imgtk = ImageTk.PhotoImage(image=img)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=imgtk)
         self.photo = imgtk  # Keep a reference to avoid garbage collection
         self.master.after(10, self.update)
 
-        """
-        ret, frame = self.cap.read()
-        if ret:
-            frame = cv2.cvtColor(cv2.flip(frame, 1), cv2.COLOR_BGR2RGB)
-            if self.detecting:
-                results = self.pose.process(frame)
-                if results.pose_landmarks:
-                    self.draw_landmarks(frame, results.pose_landmarks)
-
-                    # Here would be my custom MediaPipe analysis
-                    # Example: analyze specific landmarks, calculate angles, etc.
-                    # custom_analysis(results.pose_landmarks)
-
-            # Convert the image to PIL format
-            img = Image.fromarray(frame)
-            imgtk = ImageTk.PhotoImage(image=img)
-            self.canvas.create_image(0, 0, anchor=tk.NW, image=imgtk)
-            self.photo = imgtk  # Keep a reference to avoid garbage collection
-        self.master.after(10, self.update)
-        """
-
-    def draw_landmarks(self, frame, landmarks):
-        mp_drawing = mp.solutions.drawing_utils
-        mp_drawing.draw_landmarks(frame, landmarks, self.mp_pose.POSE_CONNECTIONS)
-
     def start_detection(self):
         self.detecting = True
         self.start_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
+
+        # Zeiten zurücksetzen
+        self.time_correct_pose = 0
+        self.time_incorrect_pose = 0
 
         # Update the class property in UI
         self.pose_score += 1

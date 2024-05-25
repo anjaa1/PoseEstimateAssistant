@@ -36,11 +36,8 @@ class PoseEstimation:
         return int(180/m.pi)*theta
     
     # Erfassen der Koordinaten der Körperhaltungspunkte 
-    def getCoordinates(self, keypoints, Width, Heigth):
-        lm = keypoints.pose_landmarks
-        if lm:
+    def getCoordinates(self, lm, Width, Heigth):
             lmPose  = self.mp_pose.PoseLandmark
-
             # x und y - Koordinaten der linken Schulter
             l_shldr_x = int(lm.landmark[lmPose.LEFT_SHOULDER].x * Width)
             l_shldr_y = int(lm.landmark[lmPose.LEFT_SHOULDER].y * Heigth)
@@ -66,10 +63,6 @@ class PoseEstimation:
             l_wrist_y = int(lm.landmark[lmPose.LEFT_WRIST].y * Heigth)
 
             return l_shldr_x, l_shldr_y, r_shldr_x, r_shldr_y, l_ear_x, l_ear_y, l_hip_x, l_hip_y, l_elbow_x, l_elbow_y, l_wrist_x, l_wrist_y
-        
-        else:
-            self.error = "Fehler: Es konnten keine Koerperpunkte erkannt werden. Bitte Kamera erneut ausrichten"
-            print("Fehler: Es konnten keine Koerperpunkte erkannt werden")
     
     # Kameraausrichtung ermitteln und bewerten
     def AlignCamera(self, Shoulder_Lx, Shoulder_Ly, Shoulder_Rx, Shoulder_Ry, video, Width):
@@ -169,7 +162,7 @@ class PoseEstimation:
                 self.bad_frames += 1
                 self.good_frames = 0
 
-            # Berechne die Dauer der guten bzw. schlechten Haltung
+            # Berechne die Dauer der guten bzw. schlechten Haltung 
             self.good_time = (1 / fps) * self.good_frames
             self.bad_time =  (1 / fps) * self.bad_frames
 
@@ -195,89 +188,92 @@ class PoseEstimation:
 
         # Erstelle das Videoerfassungsobjekt (0 -> Standard-Webcam des Systems)
     
-    def videoFeedForHMI(self, captureObject, video):
+    def videoFeedForHMI(self, captureObject, video_rgb):
         # FPS des Videos messen
         fps = captureObject.get(cv2.CAP_PROP_FPS)
         # Höhe und Breite des Video-Streams erfassen
-        Height, Width = video.shape[:2]
+        Height, Width = video_rgb.shape[:2]
 
-        # Transformiere BGR zu RGB
-        video_rgb = cv2.cvtColor(cv2.flip(video,1), cv2.COLOR_BGR2RGB)
-
-        # Erhalte Körperpunkte 
+        # Erfasse Körperpunkte und deren Koordinatenpunkte
         keypoints = self.pose.process(video_rgb)
+        landmarks = keypoints.pose_landmarks
 
-        # Ermittel die Haupt-Koordinatenpunkte
-        Shoulder_Lx, Shoulder_Ly, Shoulder_Rx, Shoulder_Ry, Ear_Lx, Ear_Ly, Hip_Lx, Hip_Ly, Elbow_Lx, Elbow_Ly, Wrist_Lx, Wrist_Ly = self.getCoordinates(keypoints, Width, Height) 
+        # Wenn Koordinatenpunkte gefunden, dann Programm ausführen
+        if landmarks != None: 
+            Shoulder_Lx, Shoulder_Ly, Shoulder_Rx, Shoulder_Ry, Ear_Lx, Ear_Ly, Hip_Lx, Hip_Ly, Elbow_Lx, Elbow_Ly, Wrist_Lx, Wrist_Ly = self.getCoordinates(landmarks, Width, Height) 
 
-        ############################################# Ausrichten der Kamera #############################################
-        aligned = self.AlignCamera(Shoulder_Lx, Shoulder_Ly, Shoulder_Rx, Shoulder_Ry, video_rgb, Width)
+            ############################################# Ausrichten der Kamera #############################################
+            aligned = self.AlignCamera(Shoulder_Lx, Shoulder_Ly, Shoulder_Rx, Shoulder_Ry, video_rgb, Width)
 
-        ######################################### Berechne die Neigungswinkel ###########################################
-        neck_inclination = self.getAngle(Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly)
-        torso_inclination = self.getAngle(Hip_Lx, Hip_Ly, Shoulder_Lx, Shoulder_Ly)
-        lowerarm_inclination = self.getAngle(Elbow_Lx, Elbow_Ly, Wrist_Lx, Wrist_Ly)
+            ######################################### Berechne die Neigungswinkel ###########################################
+            neck_inclination = self.getAngle(Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly)
+            torso_inclination = self.getAngle(Hip_Lx, Hip_Ly, Shoulder_Lx, Shoulder_Ly)
+            lowerarm_inclination = self.getAngle(Elbow_Lx, Elbow_Ly, Wrist_Lx, Wrist_Ly)
 
-        ##################################### Einzeichnen der Punkte in das Video #######################################
-        cv2.circle(video_rgb, (Shoulder_Lx, Shoulder_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
-        cv2.circle(video_rgb, (Ear_Lx, Ear_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
-        cv2.circle(video_rgb, (Shoulder_Rx, Shoulder_Ry), 7, (255, 0, 255), -1) # Zeichne Kreis in Farbe Pink
-        cv2.circle(video_rgb, (Hip_Lx, Hip_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
-        cv2.circle(video_rgb, (Elbow_Lx, Elbow_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
-        cv2.circle(video_rgb, (Wrist_Lx, Wrist_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
+            ##################################### Einzeichnen der Punkte in das Video #######################################
+            cv2.circle(video_rgb, (Shoulder_Lx, Shoulder_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
+            cv2.circle(video_rgb, (Ear_Lx, Ear_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
+            cv2.circle(video_rgb, (Shoulder_Rx, Shoulder_Ry), 7, (255, 0, 255), -1) # Zeichne Kreis in Farbe Pink
+            cv2.circle(video_rgb, (Hip_Lx, Hip_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
+            cv2.circle(video_rgb, (Elbow_Lx, Elbow_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
+            cv2.circle(video_rgb, (Wrist_Lx, Wrist_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
 
-        ############################### Bewertung der Haltung anhand der Messungen ###################################### -> hier Linien einzeln einfärben!
-
-        if neck_inclination < 20: # Gute Haltung -> Farbe Grün
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly, (127, 255, 0))
-            self.bad_frames = 0
-            self.good_frames += 1
-        elif neck_inclination >= 20 and neck_inclination <= 40: # Mittelmäßige Haltung -> Farbe Orange
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly, (255,165,0))
-            self.bad_frames = 0
-            self.good_frames += 1
-        else: # Schlechte Haltung -> Farbe Rot
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly, (255, 0, 0))
-            self.bad_frames += 1
+            ############################### Bewertung der Haltung anhand der Messungen ###################################### -> hier Linien einzeln einfärben!
             self.good_frames = 0
-
-        if torso_inclination < 10: # Gute Haltung -> Farbe Grün
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Hip_Lx, Hip_Ly, (127, 255, 0))
             self.bad_frames = 0
-            self.good_frames += 1
-        elif torso_inclination >=10 and torso_inclination < 15: # Mittelmäßige Haltung -> Farbe Orange
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Hip_Lx, Hip_Ly, (255,165,0))
-            self.bad_frames = 0
-            self.good_frames += 1
-        else: # Schlechte Haltung -> Farbe Rot
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Hip_Lx, Hip_Ly, (255, 0, 0))
-            self.bad_frames += 1
-            self.good_frames = 0
 
-        if lowerarm_inclination < 100 and lowerarm_inclination > 80: # Gute Haltung -> Farbe Grün
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Elbow_Lx, Elbow_Ly, (127, 255, 0))
-            self.drawline(video_rgb, Wrist_Lx, Wrist_Ly, Elbow_Lx, Elbow_Ly, (127, 255, 0))
-            self.bad_frames = 0
-            self.good_frames += 1
-        elif (lowerarm_inclination >= 100 and lowerarm_inclination <= 120) or (lowerarm_inclination >= 60 and lowerarm_inclination <= 80): # Mittelmäßige Haltung -> Farbe Orange
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Elbow_Lx, Elbow_Ly, (255,165,0))
-            self.drawline(video_rgb, Wrist_Lx, Wrist_Ly, Elbow_Lx, Elbow_Ly, (255,165,0))
-            self.bad_frames = 0
-            self.good_frames += 1
-        else: # Schlechte Haltung -> Farbe Rot
-            self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Elbow_Lx, Elbow_Ly, (255, 0, 0))
-            self.drawline(video_rgb, Wrist_Lx, Wrist_Ly, Elbow_Lx, Elbow_Ly, (255, 0, 0))
-            self.bad_frames += 1
-            self.good_frames = 0
+            if neck_inclination < 20: # Gute Haltung -> Farbe Grün
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly, (127, 255, 0))
+                self.good_frames += 1
+            elif neck_inclination >= 20 and neck_inclination <= 40: # Mittelmäßige Haltung -> Farbe Orange
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly, (255,165,0))
+                self.good_frames += 1
+            else: # Schlechte Haltung -> Farbe Rot
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly, (255, 0, 0))
+                self.bad_frames += 1
 
-        # Berechne die Dauer der guten bzw. schlechten Haltung
-        self.good_time += (1 / fps) * self.good_frames
-        self.bad_time +=  (1 / fps) * self.bad_frames
+            if torso_inclination < 10: # Gute Haltung -> Farbe Grün
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Hip_Lx, Hip_Ly, (127, 255, 0))
+                self.good_frames += 1
+            elif torso_inclination >=10 and torso_inclination < 15: # Mittelmäßige Haltung -> Farbe Orange
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Hip_Lx, Hip_Ly, (255,165,0))
+                self.good_frames += 1
+            else: # Schlechte Haltung -> Farbe Rot
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Hip_Lx, Hip_Ly, (255, 0, 0))
+                self.bad_frames += 1
 
-        #print("Good Frames: ", self.good_frames, " -> Time: ", good_time)
-        #print("Bad Frames: ", self.bad_frames, " -> Time: ", bad_time)
+            if lowerarm_inclination < 100 and lowerarm_inclination > 80: # Gute Haltung -> Farbe Grün
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Elbow_Lx, Elbow_Ly, (127, 255, 0))
+                self.drawline(video_rgb, Wrist_Lx, Wrist_Ly, Elbow_Lx, Elbow_Ly, (127, 255, 0))
+                self.good_frames += 1
+            elif (lowerarm_inclination >= 100 and lowerarm_inclination <= 120) or (lowerarm_inclination >= 60 and lowerarm_inclination <= 80): # Mittelmäßige Haltung -> Farbe Orange
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Elbow_Lx, Elbow_Ly, (255,165,0))
+                self.drawline(video_rgb, Wrist_Lx, Wrist_Ly, Elbow_Lx, Elbow_Ly, (255,165,0))
+                self.good_frames += 1
+            else: # Schlechte Haltung -> Farbe Rot
+                self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Elbow_Lx, Elbow_Ly, (255, 0, 0))
+                self.drawline(video_rgb, Wrist_Lx, Wrist_Ly, Elbow_Lx, Elbow_Ly, (255, 0, 0))
+                self.bad_frames += 1
 
-        return video_rgb, self.good_time, self.bad_time, aligned
+            if self.good_frames > self.bad_frames:
+                correctPose = True
+            else:
+                correctPose = False    
+
+            # Berechne die Dauer der guten bzw. schlechten Haltung
+            self.good_time = ((1 / fps) * self.good_frames)
+            self.bad_time =  ((1 / fps) * self.bad_frames)
+
+            return [video_rgb, correctPose, self.good_time, self.bad_time, aligned, False] # error = False
+        else:
+            self.error = "Fehler: Es konnten keine Koerperpunkte erkannt werden. Bitte Kamera erneut ausrichten"
+            print("Fehler: Es konnten keine Koerperpunkte erkannt werden")
+
+            # Attribute zurücksetzen für Abbild in HMI
+            self.good_time = 0
+            self.bad_time = 0
+            
+            return [video_rgb, False, self.good_time, self.bad_time, False, self.error] # correctPose = False | aligned = False
 
 """
 # Der Teil nur für Einzelausführung der Python-Datei relevant
