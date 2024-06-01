@@ -11,7 +11,7 @@ def main():
         rasaclient = RasaClient()
         poseEstimation = PoseEstimation()
         root = tk.Tk()
-        app = LandmarkDetectorApp(root, poseEstimation_model=poseEstimation)
+        app = LandmarkDetectorApp(root, poseEstimation_model=poseEstimation, rasaClient=rasaclient)
         root.mainloop()
     except Exception as e:
         print("An error occurred:")

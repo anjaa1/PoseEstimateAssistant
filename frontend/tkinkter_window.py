@@ -12,10 +12,11 @@ class LandmarkDetectorApp:
     pose_score = 0
     time_correct_pose = 13
 
-    def __init__(self, master, poseEstimation_model):
+    def __init__(self, master, poseEstimation_model, rasaClient):
         self.master = master
         self.master.title("Landmark Detector")
         self.poseEstimation_model = poseEstimation_model
+        self.rasaClient = rasaClient
 
         # Main frame for the whole app
         self.main_frame = Frame(self.master, padx=20, pady=20)
