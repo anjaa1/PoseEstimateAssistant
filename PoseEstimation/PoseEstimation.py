@@ -257,13 +257,15 @@ class PoseEstimation:
 
             if self.good_frames > self.bad_frames:
                 correctPose = True
+                #self.good_time = ((1 / fps) * self.good_frames) # Berechne die Dauer der guten Haltung
+                self.good_time = (1 / fps)
+                self.bad_time = 0
             else:
-                correctPose = False    
-
-            # Berechne die Dauer der guten bzw. schlechten Haltung
-            self.good_time = ((1 / fps) * self.good_frames)
-            self.bad_time =  ((1 / fps) * self.bad_frames)
-
+                correctPose = False
+                #self.bad_time =  ((1 / fps) * self.bad_frames) # Berechne die Dauer der schlechten Haltung
+                self.bad_time =  (1 / fps)
+                self.good_time = 0
+            
             return [video_rgb, correctPose, self.good_time, self.bad_time, aligned, False] # error = False
         else:
             self.error = "Fehler: Es konnten keine Koerperpunkte erkannt werden. Bitte Kamera erneut ausrichten"
