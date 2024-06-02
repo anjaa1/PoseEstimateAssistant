@@ -3,31 +3,64 @@ version: "3.1"
 intents:
   - greet
   - goodbye
-  - affirm
-  - deny
-  - mood_great
-  - mood_unhappy
-  - bot_challenge
+  - ask_about_app
+  - ask_about_posture
+  - ask_about_fitness
+  - ask_about_function
+  - ask_about_score
+  - ask_about_bot
+  - ask_about_statistics
+  - nlu_fallback
+  - ask_chatbot_about_functions
 
 responses:
   utter_greet:
-  - text: "Hey! How are you?"
-
-  utter_cheer_up:
-  - text: "Here is something to cheer you up:"
-    image: "https://i.imgur.com/nGF1K8f.jpg"
-
-  utter_did_that_help:
-  - text: "Did that help you?"
-
-  utter_happy:
-  - text: "Great, carry on!"
-
+    - text: "Hallo! Wie kann ich dir helfen?"
+    - text: "Hi! Was kann ich für dich tun?"
+    - text: "Hey! Wie kann ich dir behilflich sein?"
   utter_goodbye:
-  - text: "Bye"
-
-  utter_iamabot:
-  - text: "I am a bot, powered by Rasa."
+    - text: "Auf Wiedersehen! Bleib gesund!"
+    - text: "Tschüss! Pass auf dich auf!"
+    - text: "Bis später! Alles Gute!"
+  utter_explain_app:
+    - text: "Diese Applikation nutzt Mediapipe, um deine Sitzhaltung mit einem Score zu bewerten und dir Tipps für eine bessere Körperhaltung beim Sitzen zu geben."
+    - text: "Mit Mediapipe hilft dir diese App, deine Sitzhaltung in Form eines Scores zu analysieren"
+    - text: "Unsere App verwendet Mediapipe und einen Score, um deine Sitzhaltung zu überprüfen und dir Hinweise zur Fitness am Arbeitsplatz zu geben."
+  utter_explain_score:
+    - text: "Es werden zwei Metriken angezeigt, die deine Körperhaltung in Echtzeit modellieren: Ein genereller Score, der sich direkt aus deiner aktuellen Körperhaltung berechnet und die Zeit, seitdem du eine korrekte Körperhaltung hast."
+    - text: "Die App zeigt zwei Metriken in Echtzeit an: Ein allgemeiner Score, der deine aktuelle Körperhaltung bewertet, und die Zeit, seit der du eine korrekte Haltung beibehältst."
+    - text: "Zwei Metriken modellieren deine Körperhaltung in Echtzeit: Ein Score, der aus deiner gegenwärtigen Haltung berechnet wird, und die Dauer, die du bereits in korrekter Haltung verbringst."
+  utter_explain_function:
+    - text: "Auf der linken Seite befindet sich die Aufnahme deiner Webcam. Mit den Buttons darunter kannst du die Analyse starten/stoppen. Über dem Video kannst du die Metriken einsehen."
+    - text: "Links siehst du die Webcam-Aufnahme. Mit den Buttons darunter kannst du die Analyse beginnen oder stoppen. Die Metriken findest du oberhalb des Videos."
+    - text: "Die Webcam-Aufnahme ist auf der linken Seite. Du kannst die Analyse mit den darunter befindlichen Buttons starten oder stoppen. Die Metriken werden über dem Video angezeigt."
+  utter_explain_posture:
+    - text: "Eine gute Sitzhaltung bedeutet, dass dein Rücken gerade ist, deine Schultern entspannt sind und deine Füße flach auf dem Boden stehen."
+    - text: "Für eine gesunde Sitzhaltung solltest du darauf achten, dass dein Rücken gerade bleibt, deine Schultern locker sind und deine Füße den Boden berühren."
+    - text: "Eine korrekte Sitzhaltung umfasst einen geraden Rücken, entspannte Schultern und Füße, die flach auf dem Boden stehen."
+  utter_explain_fitness:
+    - text: "Für die Gesundheit deines Rückens sind Übungen wie Planks, Brücken und Dehnübungen besonders gut."
+    - text: "Um deinen Rücken gesund zu halten, empfehle ich Übungen wie Planks, Brücken und verschiedene Dehnübungen."
+    - text: "Planks, Brücken und Dehnübungen sind hervorragend geeignet, um deinen Rücken zu stärken und gesund zu halten."
+  utter_explain_bot:
+    - text: "Ja, ich bin ein Bot, entwickelt um dir zu helfen!"
+    - text: "Ich bin ein Computerprogramm, das dazu da ist, deine Fragen zu beantworten."
+    - text: "Ja, ich bin ein Bot. Wie kann ich dir weiterhelfen?"
+  utter_explain_statistics:
+    - text: "Studien zeigen, dass etwa 80% der Bevölkerung irgendwann in ihrem Leben unter Rückenschmerzen leiden."
+    - text: "Schlechte Körperhaltung ist eine der häufigsten Ursachen für Rückenschmerzen und betrifft Millionen von Menschen weltweit."
+    - text: "Statistiken belegen, dass bis zu 90% der Büroangestellten von Zeit zu Zeit unter Beschwerden aufgrund schlechter Sitzhaltung leiden."
+    - text: "Untersuchungen haben ergeben, dass regelmäßiges Aufstehen und Dehnen am Arbeitsplatz die Gesundheit der Wirbelsäule erheblich verbessern kann."
+    - text: "Es wird geschätzt, dass Rückenschmerzen jährlich Milliarden an Gesundheitskosten verursachen, oft bedingt durch schlechte Körperhaltung."
+  utter_default:
+    - text: "Entschuldigung, das habe ich nicht verstanden. Kannst du das bitte anders formulieren?"
+    - text: "Das verstehe ich leider nicht. Könntest du deine Frage anders stellen?"
+    - text: "Tut mir leid, ich bin mir nicht sicher, was du meinst. Kannst du es nochmal versuchen?"
+  utter_show_chatbot_function:
+    - text: "Ich kann dir die App und die Metriken erklären. Außerdem kann ich Informationen zu Fitness und Gesundheit geben sowie einige interessante Statistiken aufzählen."
+    - text: "Meine Fähigkeiten umfassen die Erklärung der App und ihrer Metriken, das Bereitstellen von Informationen zu Fitness und Gesundheit sowie das Aufzählen relevanter Statistiken."
+    - text: "Ich bin hier, um dir die App und ihre Metriken zu erklären. Zusätzlich kann ich dir auch Infos zu Fitness und Gesundheit geben und einige interessante Statistiken nennen."
+    - text: "Ich kann die Funktionen und Metriken der App erläutern, Infos zu Fitness und Gesundheit bereitstellen und dir verschiedene relevante Statistiken aufzeigen."
 
 session_config:
   session_expiration_time: 60

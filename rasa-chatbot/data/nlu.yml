@@ -3,89 +3,186 @@ version: "3.1"
 nlu:
 - intent: greet
   examples: |
-    - hey
-    - hello
-    - hi
-    - hello there
-    - good morning
-    - good evening
-    - moin
-    - hey there
-    - let's go
-    - hey dude
-    - goodmorning
-    - goodevening
-    - good afternoon
+    - Hallo
+    - Hi
+    - Guten Tag
+    - Hey
 
 - intent: goodbye
   examples: |
-    - cu
-    - good by
-    - cee you later
-    - good night
-    - bye
-    - goodbye
-    - have a nice day
-    - see you around
-    - bye bye
-    - see you later
+    - Tschüss
+    - Auf Wiedersehen
+    - Bis später
+    - Ciao
 
-- intent: affirm
+- intent: ask_chatbot_about_functions
   examples: |
-    - yes
-    - y
-    - indeed
-    - of course
-    - that sounds good
-    - correct
+    - Was kannst du?
+    - Deine Funktionen?
+    - Welche Funktionen hast du?
+    - Zeig mir deine Funktionen.
+    - Was sind deine Fähigkeiten?
+    - Welche Aufgaben kannst du erledigen?
+    - Kannst du mir deine Funktionen erklären?
+    - Welche Aufgaben kannst du übernehmen?
+    - Wofür bist du programmiert?
+    - Was kannst du alles machen?
+    - Was sind deine Hauptfunktionen?
+    - Wozu bist du in der Lage?
+    - Welche Dienste kannst du anbieten?
+    - Welche Aktionen kannst du ausführen?
+    - Was für Fähigkeiten hast du?
+    - Erzähl mir von deinen Funktionen.
+    - Was sind deine Funktionen?
+    - Was kannst du tun?
+    - Welche Sachen kannst du machen?
+    - Welche Möglichkeiten bietest du?
 
-- intent: deny
+- intent: ask_about_bot
   examples: |
-    - no
-    - n
-    - never
-    - I don't think so
-    - don't like that
-    - no way
-    - not really
+    - Bist du ein Bot?
+    - Bist du ein Computer?
+    - Bist du ein Roboter?
+    - Wurdest du programmiert?
+    - Sprichst du mit mir?
 
-- intent: mood_great
+- intent: ask_chatbot_about_functions
   examples: |
-    - perfect
-    - great
-    - amazing
-    - feeling like a king
-    - wonderful
-    - I am feeling very good
-    - I am great
-    - I am amazing
-    - I am going to save the world
-    - super stoked
-    - extremely good
-    - so so perfect
-    - so good
-    - so perfect
+    - Was kannst du?
+    - Welche Funktionen hast du?
+    - Zeig mir, was du kannst.
+    - Was sind deine Fähigkeiten?
+    - Kannst du mir deine Funktionen erklären?
+    - Was für Aufgaben kannst du erledigen?
+    - Welche Funktionen bietet der Chatbot?
+    - Kannst du mir zeigen, was du drauf hast?
+    - Erkläre mir, was du tun kannst.
+    - Was kannst du alles machen?
+    - Was sind deine Hauptfunktionen?
+    - Wozu bist du in der Lage?
+    - Welche Dienste kannst du anbieten?
+    - Welche Aktionen kannst du ausführen?
+    - Was für Fähigkeiten hast du?
 
-- intent: mood_unhappy
+- intent: ask_about_app
   examples: |
-    - my day was horrible
-    - I am sad
-    - I don't feel very well
-    - I am disappointed
-    - super sad
-    - I'm so sad
-    - sad
-    - very sad
-    - unhappy
-    - not good
-    - not very good
-    - extremly sad
-    - so saad
-    - so sad
+    - Was ist der Zweck dieser App?
+    - Was kann ich mit dieser Applikation erreichen?
+    - Wofür ist diese Anwendung gedacht?
+    - Was macht diese Applikation besonders?
+    - Wofür wird die App verwendet?
+    - Kannst du mir die App beschreiben?
 
-- intent: bot_challenge
+- intent: ask_about_function
   examples: |
-    - are you a bot?
-    - are you a human?
-    - am I talking to a bot?
-    - am I talking to a human?
+    - Welche Funktionen bietet die App?
+    - Was genau kann ich mit der App tun?
+    - Welche Features sind in der App enthalten?
+    - Welche spezifischen Funktionen hat die App?
+    - Was sind die Hauptfunktionen dieser Anwendung?
+    - Kannst du die Funktionen der App erklären?
+    - Erkläre die Elementen?
+    - Was sind die Elemente
+    - Was bedeutet das Video
+    - Was sind die Markierungen
+    - Was bedeuten die Knöpfe
+    - Was bedeuten die Buttons
+    - Funktionen der Buttons
+    - Was ist mit der Webcam
+    - Webcam?
+
+- intent: ask_about_score
+  examples: |
+    - Wie erfolgt die Bewertung?
+    - Was bedeuten die Punkte?
+    - Wie wird meine Sitzhaltung bewertet?
+    - Was bedeutet die Punktzahl?
+    - Was ist der Score?
+    - Welcher Score?
+    - Wie kann ich den Score verstehen
+    - Was bedeutet die Metrik?
+    - Was sind die Zahlen, die sich über der Webcam ändern?
+    - Was sind die Metriken
+    - Was verstehe ich unter dem Score
+    - Was kannst du zu den Metriken sagen
+    - Metriken
+    - Score
+    - Welche Metriken gibt es
+    - Welche Metriken benutzt du
+    - Wie entstehen die Metriken
+    - Was für Metriken werden angezeigt
+    - Was kannst du zu den Metriken sagen
+    - Was kannst du zur Metrik sagen
+    - Punktzahl
+
+- intent: ask_about_posture
+  examples: |
+    - Was ist eine gute Sitzhaltung?
+    - Wie kann ich meine Körperhaltung verbessern?
+    - Welche Übungen helfen gegen eine schlechte Haltung?
+    - Warum ist eine gute Körperhaltung wichtig?
+
+- intent: ask_about_fitness
+  examples: |
+    - Welche Fitnessübungen sind gut für den Rücken?
+    - Wie kann ich fit bleiben?
+    - Was sind die besten Übungen für die Gesundheit?
+    - Wie oft sollte ich trainieren?
+
+- intent: ask_about_statistics
+  examples: |
+    - Wie viele Menschen haben eine schlechte Körperhaltung?
+    - Gibt es Statistiken zur Körperhaltung?
+    - Wie verbreitet sind Rückenschmerzen aufgrund schlechter Haltung?
+    - Welche Statistiken gibt es zur Sitzhaltung?
+    - Kannst du mir Informationen zur Körperhaltung geben?
+    - Was sagen Studien über die Auswirkungen von schlechter Körperhaltung?
+    - Was sind Fakten über Fitness?
+    - Erzähle mir etwas Spannendes.
+    - Kannst du mir interessante Statistiken nennen?
+    - Gibt es wissenschaftliche Erkenntnisse zur Körperhaltung?
+    - Erzähl was
+    - Sag was
+    - Gibt es Informationen
+
+- intent: nlu_fallback
+  examples: |
+    - Wie groß ist das Universum?
+    - Kannst du mir bei meinem Hausbau helfen?
+    - Was ist der beste Weg, um fit zu bleiben?
+    - Was ist der Unterschied zwischen einem Alligator und einem Krokodil?
+    - Kannst du mir eine Geschichte aus deinem Leben erzählen?
+    - Wie viele Wörter gibt es in der deutschen Sprache?
+    - Was ist die durchschnittliche Lebensdauer eines Goldfisches?
+    - Wie viele Zähne hat ein erwachsener Mensch?
+    - Kannst du mir bei meinem Englisch-Hausaufgaben helfen?
+    - Welche ist die seltenste Blume der Welt?
+    - Wie viel wiegt eine Wolke?
+    - Kannst du mir sagen, wie ich ein Auto repariere?
+    - Was ist die höchste Berg der Welt?
+    - Welche Tiere leben am Nordpol?
+    - Wie viele Knochen hat der menschliche Körper?
+    - Was ist das größte Land der Welt?
+    - Kannst du mir ein Lied singen?
+    - Wie viel Zeit benötigt man, um den Mond zu erreichen?
+    - Wie viele Arten von Pinguinen gibt es?
+    - Was ist die durchschnittliche Geschwindigkeit einer Schnecke?
+    - Kannst du mir bei meiner Hausarbeit helfen?
+    - Welcher ist der gefährlichste Tier der Welt?
+    - Wie viele Menschen leben auf der Erde?
+    - Was ist die schnellste Tier auf dem Land?
+    - Wie viele Sprachen gibt es auf der Welt?
+    - Kannst du mir sagen, wie ich eine Rakete bauen kann?
+    - Was ist der Unterschied zwischen links- und rechtshändigen Menschen?
+    - Wie viele Sterne gibt es in unserer Galaxie?
+    - Was ist der beste Weg, um eine Pizza zu backen?
+    - Kannst du mir bei meinem Mathe-Problem helfen?
+    - Wie alt ist das älteste bekannte Tier?
+    - Was ist das kleinste Land der Welt?
+    - Wie viel Prozent unseres Gehirns verwenden wir?
+    - Kannst du mir sagen, wie ich einen Kuchen backe?
+    - Was ist die tiefste Stelle im Ozean?
+    - Wie viele Kontinente gibt es auf der Welt?
+    - Was ist der Unterschied zwischen einem Croissant und einem Baguette?
+    - Wie viele Haare hat ein durchschnittlicher Mensch?
+    - Kannst du mir erklären, wie man einen Knoten bindet?
