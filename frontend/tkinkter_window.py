@@ -145,14 +145,11 @@ class LandmarkDetectorApp:
                         self.time_correct_pose += temp_goodtime
                         self.time_incorrect_pose = 0
                         self.KPI_pose_time_label.config(text=f"Correct Pose Time: {round(self.time_correct_pose)} Sekunden")
-                        print("Correct Posetime: ", self.time_correct_pose)
                     else:
                         # Zeiten für gute/schlechte Haltung aktualisieren
                         self.time_correct_pose = 0
                         self.time_incorrect_pose += temp_badtime
                         self.KPI_pose_time_label.config(text=f"Incorrect Pose Time: {round(self.time_incorrect_pose)} Sekunden")
-                        print("Incorrect Posetime: ", self.time_incorrect_pose)
-                        
                 else:
                     self.KPI_pose_align_label.config(text="Camera not aligned", fg = "red") # Label aligned aktualisieren
                     self.KPI_pose_time_label.config(text=f"Correct Pose Time: - Sekunden")
