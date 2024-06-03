@@ -1,3 +1,4 @@
+import math
 import threading
 import tkinter as tk
 import traceback
@@ -6,7 +7,6 @@ from tkinter import Frame, scrolledtext
 import cv2
 import mediapipe as mp
 from PIL import Image, ImageTk
-import math
 
 
 class LandmarkDetectorApp:
@@ -28,12 +28,17 @@ class LandmarkDetectorApp:
         self.main_frame.pack(fill='both', expand=True)
 
         # Left frame for video display
-        self.left_frame = Frame(self.main_frame, width=640)
-        self.left_frame.pack(side=tk.LEFT, fill='both', expand=True)
+        self.left_frame = Frame(self.main_frame, width=640, borderwidth=2, relief='groove')
+        self.left_frame.grid(row=0, column=0, sticky='nsew')
 
-         # Right frame for chatbot
-        self.right_frame = Frame(self.main_frame, width=320)
-        self.right_frame.pack(side=tk.RIGHT, fill='both', expand=False)
+        # Right frame for chatbot
+        self.right_frame = Frame(self.main_frame, width=320, borderwidth=2, relief='groove')
+        self.right_frame.grid(row=0, column=1, sticky='nsew', padx=(10, 0))
+
+        # Configure grid to expand properly
+        self.main_frame.grid_rowconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(0, weight=1)
+        self.main_frame.grid_columnconfigure(1, weight=1)
 
         # Pose detection
         self.time_correct_pose = 0
@@ -66,21 +71,20 @@ class LandmarkDetectorApp:
 
         # Frame for Landmark detection
         self.Landmark_frame = Frame(self.left_frame)
-        self.Landmark_frame.configure(background="black")
-        self.Landmark_frame.pack(fill=tk.X)
+        self.Landmark_frame.pack(fill='both', expand=True)
 
         self.start_button = tk.Button(self.Landmark_frame, text="Start", command=self.start_detection)
-        self.start_button.grid(row=0, column=0, padx=1, pady=1, sticky="ew")
+        self.start_button.grid(row=0, column=0, padx=3, pady=3, sticky="new")
 
         self.stop_button = tk.Button(self.Landmark_frame, text="Stop", command=self.stop_detection, state=tk.DISABLED)
-        self.stop_button.grid(row=0, column=1, padx=1, pady=1, sticky="ew")
+        self.stop_button.grid(row=0, column=1, padx=3, pady=3, sticky="new")
 
-        self.error_info_label = tk.Label(self.Landmark_frame, text= "No error detected. Everthing works correct!", borderwidth=2)
-        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=1, pady=1, sticky="ew")
-
+        self.Landmark_frame.rowconfigure(1, weight=1)
         self.Landmark_frame.columnconfigure(0, weight=1) # Make column 0 of the Landmark frame expandable
         self.Landmark_frame.columnconfigure(1, weight=1) # Make column 1 of the Landmark frame expandable
 
+        self.error_info_label = tk.Label(self.Landmark_frame, text= "No error detected. Everthing works correct!", borderwidth=2)
+        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=3, pady=3, sticky="nsew")
 
         self.cap = cv2.VideoCapture(0)
         self.detecting = False
@@ -88,27 +92,31 @@ class LandmarkDetectorApp:
 
         # Chat window configuration
         self.chat_window = scrolledtext.ScrolledText(
-            self.right_frame, wrap=tk.WORD, state=tk.DISABLED, bg='#F5F5F5', fg='#333333', font=("Helvetica", 10), padx=10, pady=10
+            self.right_frame, wrap=tk.WORD, state=tk.DISABLED, bg='#F5F5F5', fg='#333333', font=("Helvetica", 10)
         )
-        self.chat_window.tag_configure("right", justify='right', background="#DCF8C6", foreground="#333333", font=("Helvetica", 10), lmargin1=10, lmargin2=10, rmargin=10)
+        self.chat_window.tag_configure("right", justify='right', background="#E5E5E5", foreground="#333333", font=("Helvetica", 10), lmargin1=10, lmargin2=10, rmargin=10)
         self.chat_window.tag_configure("left", justify='left', background="#FFFFFF", foreground="#333333", font=("Helvetica", 10), lmargin1=10, lmargin2=10, rmargin=10)
-        self.chat_window.pack(expand=False, fill='both', padx=5, pady=5)
+        self.chat_window.pack(expand=True, fill='both')
 
         # Create Frame for the entry and button at the bottom
         self.bottom_frame = tk.Frame(self.right_frame)
-        self.bottom_frame.pack(fill='x', padx=5, pady=5)
+        self.bottom_frame.pack(fill='x')
 
-        self.entry = tk.Entry(self.bottom_frame, font=('Helvetica', 12), width=50)
-        self.entry.pack(side=tk.LEFT, padx=5, pady=5, fill='x', expand=True)
+        self.entry = tk.Entry(self.bottom_frame, font=('Helvetica', 10), width=50)
+        self.entry.pack(side=tk.LEFT, fill='x', expand=True)
         self.entry.bind("<Return>", self.add_message)
 
+        # load image for button
+        self.arrow_icon = tk.PhotoImage(file='frontend\\rechter-pfeil.png')
+
         # Create Button to send message
-        self.send_button = tk.Button(self.bottom_frame, text="->", command=self.add_message)
-        self.send_button.pack(side=tk.LEFT, padx=5, pady=5)
+        self.send_button = tk.Button(self.bottom_frame, text="hello", command=self.add_message, image=self.arrow_icon)
+        self.send_button.image = self.arrow_icon
+        self.send_button.pack(side=tk.LEFT, padx=(5, 15))
 
         # add an Initial message
         self.chat_window.config(state=tk.NORMAL)
-        self.chat_window.insert(tk.END, "Ich bin ein Chatbot, der dir deine Fragen beantworten kann.\n")
+        self.chat_window.insert(tk.END, "   Ich bin ein Chatbot, der dir deine Fragen beantworten kann.\n")
         self.chat_window.config(state=tk.DISABLED)
 
     def add_message(self, event=None):
@@ -133,7 +141,6 @@ class LandmarkDetectorApp:
         self.entry.delete(0, tk.END)  # Clear the entry widget
 
     def update(self):
-        
         # Variablen für Zeit
         temp_goodtime = 0
         temp_badtime = 0
@@ -208,3 +215,4 @@ class LandmarkDetectorApp:
         self.detecting = False
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
+
