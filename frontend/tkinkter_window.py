@@ -72,19 +72,20 @@ class LandmarkDetectorApp:
         # Frame for Landmark detection
         self.Landmark_frame = Frame(self.left_frame)
         self.Landmark_frame.configure(background="black")
-        self.Landmark_frame.pack(fill=tk.X)
+        self.Landmark_frame.pack(fill='both', expand=True)
 
         self.start_button = tk.Button(self.Landmark_frame, text="Start", command=self.start_detection)
-        self.start_button.grid(row=0, column=0, padx=1, pady=1, sticky="ew")
+        self.start_button.grid(row=0, column=0, padx=1, pady=1, sticky="new")
 
         self.stop_button = tk.Button(self.Landmark_frame, text="Stop", command=self.stop_detection, state=tk.DISABLED)
-        self.stop_button.grid(row=0, column=1, padx=1, pady=1, sticky="ew")
+        self.stop_button.grid(row=0, column=1, padx=1, pady=1, sticky="new")
 
-        self.error_info_label = tk.Label(self.Landmark_frame, text= "No error detected. Everthing works correct!", borderwidth=2)
-        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=1, pady=1, sticky="ew")
-
+        self.Landmark_frame.rowconfigure(1, weight=1)
         self.Landmark_frame.columnconfigure(0, weight=1) # Make column 0 of the Landmark frame expandable
         self.Landmark_frame.columnconfigure(1, weight=1) # Make column 1 of the Landmark frame expandable
+
+        self.error_info_label = tk.Label(self.Landmark_frame, text= "No error detected. Everthing works correct!", borderwidth=2)
+        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=1, pady=1, sticky="nsew")
 
         self.cap = cv2.VideoCapture(0)
         self.detecting = False
