@@ -95,7 +95,7 @@ class LandmarkDetectorApp:
         self.chat_window = scrolledtext.ScrolledText(
             self.right_frame, wrap=tk.WORD, state=tk.DISABLED, bg='#F5F5F5', fg='#333333', font=("Helvetica", 10)
         )
-        self.chat_window.tag_configure("right", justify='right', background="#DCF8C6", foreground="#333333", font=("Helvetica", 10), lmargin1=10, lmargin2=10, rmargin=10)
+        self.chat_window.tag_configure("right", justify='right', background="#E5E5E5", foreground="#333333", font=("Helvetica", 10), lmargin1=10, lmargin2=10, rmargin=10)
         self.chat_window.tag_configure("left", justify='left', background="#FFFFFF", foreground="#333333", font=("Helvetica", 10), lmargin1=10, lmargin2=10, rmargin=10)
         self.chat_window.pack(expand=True, fill='both')
 
