@@ -71,21 +71,20 @@ class LandmarkDetectorApp:
 
         # Frame for Landmark detection
         self.Landmark_frame = Frame(self.left_frame)
-        self.Landmark_frame.configure(background="black")
         self.Landmark_frame.pack(fill='both', expand=True)
 
         self.start_button = tk.Button(self.Landmark_frame, text="Start", command=self.start_detection)
-        self.start_button.grid(row=0, column=0, padx=1, pady=1, sticky="new")
+        self.start_button.grid(row=0, column=0, padx=3, pady=3, sticky="new")
 
         self.stop_button = tk.Button(self.Landmark_frame, text="Stop", command=self.stop_detection, state=tk.DISABLED)
-        self.stop_button.grid(row=0, column=1, padx=1, pady=1, sticky="new")
+        self.stop_button.grid(row=0, column=1, padx=3, pady=3, sticky="new")
 
         self.Landmark_frame.rowconfigure(1, weight=1)
         self.Landmark_frame.columnconfigure(0, weight=1) # Make column 0 of the Landmark frame expandable
         self.Landmark_frame.columnconfigure(1, weight=1) # Make column 1 of the Landmark frame expandable
 
         self.error_info_label = tk.Label(self.Landmark_frame, text= "No error detected. Everthing works correct!", borderwidth=2)
-        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=1, pady=1, sticky="nsew")
+        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=3, pady=3, sticky="nsew")
 
         self.cap = cv2.VideoCapture(0)
         self.detecting = False
@@ -107,8 +106,12 @@ class LandmarkDetectorApp:
         self.entry.pack(side=tk.LEFT, fill='x', expand=True)
         self.entry.bind("<Return>", self.add_message)
 
+        # load image for button
+        self.arrow_icon = tk.PhotoImage(file='frontend\\rechter-pfeil.png')
+
         # Create Button to send message
-        self.send_button = tk.Button(self.bottom_frame, text="->", command=self.add_message)
+        self.send_button = tk.Button(self.bottom_frame, text="hello", command=self.add_message, image=self.arrow_icon)
+        self.send_button.image = self.arrow_icon
         self.send_button.pack(side=tk.LEFT, padx=(5, 15))
 
         # add an Initial message
