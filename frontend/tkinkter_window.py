@@ -77,7 +77,7 @@ class LandmarkDetectorApp:
         self.stop_button = tk.Button(self.Landmark_frame, text="Stopp", command=self.stop_detection, state=tk.DISABLED, bg='lightgrey')
         self.stop_button.grid(row=0, column=1, padx=1, pady=1, sticky="ew")
 
-        self.error_info_label = tk.Label(self.Landmark_frame, text= "Alles funktioniert einwandfrei. Es wurde kein Fehler erkannt.", borderwidth=2, highlightthickness=2, highlightbackground="black", highlightcolor="black")
+        self.error_info_label = tk.Label(self.Landmark_frame, text= "Alles funktioniert einwandfrei. Es wurde kein Fehler erkannt.", borderwidth=2)
         self.error_info_label.grid(row=1, column=0, columnspan=2, padx=1, pady=1, sticky="ew")
 
         self.Landmark_frame.columnconfigure(0, weight=1) # Make column 0 of the Landmark frame expandable
@@ -156,7 +156,8 @@ class LandmarkDetectorApp:
                 # Wenn Kamera korrekt seitlich ausgerichtet, dann...
                 if self.aligned:
                     self.KPI_pose_align_label.config(text="Kamera ausgerichtet", bg = "lightgreen") # Label aligned aktualisieren
-                    self.error_info_label.config(text="Die Haltungserkennung funktioniert einwandfrei", highlightthickness=2, highlightbackground="green", highlightcolor="green")
+                    self.error_info_label.config(text="Die Haltungserkennung funktioniert einwandfrei", fg='green')
+                    self.error_info_label.config()
 
                     # Korrektheit der Haltung erfassen und Zeitlabel entsprechend aktualisieren
                     if correctPose:
@@ -177,14 +178,14 @@ class LandmarkDetectorApp:
                 else:
                     self.KPI_pose_align_label.config(text="Kamera nicht ausgerichtet", bg = "red") # Label aligned aktualisieren
                     self.KPI_pose_time_label.config(text=f"Korrekte Haltungsdauer: - Sekunden")
-                    self.error_info_label.config(text="Bitte richte die Kamera seitlich aus.", highlightthickness=2, highlightbackground="red", highlightcolor="red")
+                    self.error_info_label.config(text="Bitte richte die Kamera seitlich aus.", fg="red")
                     # Zeiten für gute/schlechte Haltung zurücksetzen
                     self.time_correct_pose = 0
                     self.time_incorrect_pose = 0
 
             # ... andernfalls Fehlermeldung ausgeben im dafür vorgesehenen Label
             else:
-                self.error_info_label.config(text=self.PoseError, highlightthickness=2, highlightbackground="red", highlightcolor="red")
+                self.error_info_label.config(text=self.PoseError, fg="red")
                 self.stop_detection()
                 # Zeiten für gute/schlechte Haltung zurücksetzen
                 self.time_correct_pose = 0
@@ -202,7 +203,7 @@ class LandmarkDetectorApp:
         self.start_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
 
-        # Label einblenden
+        # Label "Kamera ausgerichtet" einblenden
         self.KPI_pose_align_label.grid(row=0, column=2, sticky="nsew")  # Use sticky to expand label to fill the cell
         self.KPI_frame.columnconfigure(2, weight=1)  # Make column 2 of the KPI frame expandable
 
@@ -217,7 +218,8 @@ class LandmarkDetectorApp:
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
 
+        # Label "Kamera ausgerichtet" ausblenden
         self.KPI_pose_align_label.grid_remove()
         self.KPI_frame.columnconfigure(2, weight=0)
 
-        self.error_info_label.config(text="Der Haltungsassistent wurde gestoppt.", highlightthickness=2, highlightbackground="black", highlightcolor="black")
+        self.error_info_label.config(text="Der Haltungsassistent wurde gestoppt.", fg='black')
