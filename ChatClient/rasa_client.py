@@ -25,4 +25,4 @@ class RasaClient:
             else:
                 return "Es konnte keine Verbindung mit Rasa hergestellt werden"
         except requests.exceptions.RequestException as e:
-            return f"Anfrage an Rasa konnte nicht verarbeitet werden: {e}"  
+            return f"Anfrage an Rasa konnte nicht verarbeitet werden. Es besteht keine Verbindung zum Rasa-Server."  
