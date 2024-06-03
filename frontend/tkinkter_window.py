@@ -16,7 +16,7 @@ class LandmarkDetectorApp:
 
     def __init__(self, master, poseEstimation_model, rasaClient):
         self.master = master
-        self.master.title("Landmark Detector")
+        self.master.title("Sitzhaltungsassistent")
         self.poseEstimation_model = poseEstimation_model
         self.rasaClient = rasaClient
 
@@ -43,6 +43,8 @@ class LandmarkDetectorApp:
         # Pose detection
         self.time_correct_pose = 0
         self.time_incorrect_pose = 0
+        self.time_from_start = 0
+        self.goodTime_from_start = 0
         self.aligned = False
 
         # KPI frame
@@ -50,21 +52,21 @@ class LandmarkDetectorApp:
         self.KPI_frame.configure(background="black")
         self.KPI_frame.pack(fill=tk.X)  # Make the KPI frame as wide as the parent frame
 
-        self.KPI_pose_time_label = tk.Label(self.KPI_frame, text=f"Correct Pose Time: - Sekunden")
+        self.KPI_pose_time_label = tk.Label(self.KPI_frame, text=f"Korrekte Haltungsdauer: - Sekunden", bg='lightgreen')
         self.KPI_pose_time_label.config(borderwidth=2, relief="groove")
         self.KPI_pose_time_label.grid(row=0, column=0, sticky="nsew")  # Use sticky to expand label to fill the cell
 
-        self.KPI_pose_score_label = tk.Label(self.KPI_frame, text=f"Pose Score: {self.pose_score}")
-        self.KPI_pose_score_label.config(borderwidth=2, relief="groove")
-        self.KPI_pose_score_label.grid(row=0, column=1, sticky="nsew")  # Use sticky to expand label to fill the cell
+        self.KPI_pose_ProcentTime_label = tk.Label(self.KPI_frame, text=f"Korrekte Haltung: 0 %")
+        self.KPI_pose_ProcentTime_label.config(borderwidth=2, relief="groove")
+        self.KPI_pose_ProcentTime_label.grid(row=0, column=1, sticky="nsew")  # Use sticky to expand label to fill the cell
 
-        self.KPI_pose_align_label = tk.Label(self.KPI_frame, text="Camera not aligned", fg = "red")
+        self.KPI_pose_align_label = tk.Label(self.KPI_frame, text="Kamera nicht ausgerichtet", bg = "red")
         self.KPI_pose_align_label.config(borderwidth=2, relief="groove")
-        self.KPI_pose_align_label.grid(row=0, column=2, sticky="nsew")  # Use sticky to expand label to fill the cell
+        #self.KPI_pose_align_label.grid(row=0, column=2, sticky="nsew")  # Use sticky to expand label to fill the cell
 
         self.KPI_frame.columnconfigure(0, weight=1)  # Make column 0 of the KPI frame expandable
         self.KPI_frame.columnconfigure(1, weight=1)  # Make column 1 of the KPI frame expandable
-        self.KPI_frame.columnconfigure(2, weight=1)  # Make column 2 of the KPI frame expandable
+        #self.KPI_frame.columnconfigure(2, weight=1)  # Make column 2 of the KPI frame expandable
 
         self.canvas = tk.Canvas(self.left_frame, width=640, height=480)
         self.canvas.pack()
@@ -73,18 +75,18 @@ class LandmarkDetectorApp:
         self.Landmark_frame = Frame(self.left_frame)
         self.Landmark_frame.pack(fill='both', expand=True)
 
-        self.start_button = tk.Button(self.Landmark_frame, text="Start", command=self.start_detection)
+        self.start_button = tk.Button(self.Landmark_frame, text="Start", command=self.start_detection, bg='lightgrey')
         self.start_button.grid(row=0, column=0, padx=3, pady=3, sticky="new")
 
-        self.stop_button = tk.Button(self.Landmark_frame, text="Stop", command=self.stop_detection, state=tk.DISABLED)
+        self.stop_button = tk.Button(self.Landmark_frame, text="Stopp", command=self.stop_detection, state=tk.DISABLED, bg='lightgrey')
         self.stop_button.grid(row=0, column=1, padx=3, pady=3, sticky="new")
+
+        self.error_info_label = tk.Label(self.Landmark_frame, text= "Alles funktioniert einwandfrei. Es wurde kein Fehler erkannt.", borderwidth=2)
+        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=3, pady=3, sticky="nsew")
 
         self.Landmark_frame.rowconfigure(1, weight=1)
         self.Landmark_frame.columnconfigure(0, weight=1) # Make column 0 of the Landmark frame expandable
         self.Landmark_frame.columnconfigure(1, weight=1) # Make column 1 of the Landmark frame expandable
-
-        self.error_info_label = tk.Label(self.Landmark_frame, text= "No error detected. Everthing works correct!", borderwidth=2)
-        self.error_info_label.grid(row=1, column=0, columnspan=2, padx=3, pady=3, sticky="nsew")
 
         self.cap = cv2.VideoCapture(0)
         self.detecting = False
@@ -159,33 +161,39 @@ class LandmarkDetectorApp:
             
             # Wenn PoseEstimation ohne Fehler, dann...
             if self.PoseError == False:
-                self.error_info_label.config(text="Die Haltungserkennung funktioniert einwandfrei", fg= "green")
-                
                 # Wenn Kamera korrekt seitlich ausgerichtet, dann...
                 if self.aligned:
-                    self.KPI_pose_align_label.config(text="Camera aligned", fg = "green") # Label aligned aktualisieren
+                    self.KPI_pose_align_label.config(text="Kamera ausgerichtet", bg = "lightgreen") # Label aligned aktualisieren
+                    self.error_info_label.config(text="Die Haltungserkennung funktioniert einwandfrei", fg='green')
+                    self.error_info_label.config()
 
                     # Korrektheit der Haltung erfassen und Zeitlabel entsprechend aktualisieren
                     if correctPose:
                         # Zeiten für gute/schlechte Haltung aktualisieren
                         self.time_correct_pose += temp_goodtime
+                        self.goodTime_from_start += temp_goodtime
                         self.time_incorrect_pose = 0
-                        self.KPI_pose_time_label.config(text=f"Correct Pose Time: {round(self.time_correct_pose)} Sekunden")
+                        self.time_from_start += temp_goodtime
+                        self.KPI_pose_time_label.config(text=f"Korrekte Haltungsdauer: {round(self.time_correct_pose)} Sekunden", bg='lightgreen')
+                        self.KPI_pose_ProcentTime_label.config(text=f"Korrekte Haltung: {round((self.goodTime_from_start/self.time_from_start)*100)} %")
                     else:
                         # Zeiten für gute/schlechte Haltung aktualisieren
                         self.time_correct_pose = 0
                         self.time_incorrect_pose += temp_badtime
-                        self.KPI_pose_time_label.config(text=f"Incorrect Pose Time: {round(self.time_incorrect_pose)} Sekunden")
+                        self.time_from_start += temp_badtime
+                        self.KPI_pose_time_label.config(text=f"Falsche Haltungsdauer: {round(self.time_incorrect_pose)} Sekunden", bg='red')
+                        self.KPI_pose_ProcentTime_label.config(text=f"Korrekte Haltung: {round((self.goodTime_from_start/self.time_from_start)*100)} %")
                 else:
-                    self.KPI_pose_align_label.config(text="Camera not aligned", fg = "red") # Label aligned aktualisieren
-                    self.KPI_pose_time_label.config(text=f"Correct Pose Time: - Sekunden")
+                    self.KPI_pose_align_label.config(text="Kamera nicht ausgerichtet", bg = "red") # Label aligned aktualisieren
+                    self.KPI_pose_time_label.config(text=f"Korrekte Haltungsdauer: - Sekunden")
+                    self.error_info_label.config(text="Bitte richte die Kamera seitlich aus.", fg="red")
                     # Zeiten für gute/schlechte Haltung zurücksetzen
                     self.time_correct_pose = 0
                     self.time_incorrect_pose = 0
 
             # ... andernfalls Fehlermeldung ausgeben im dafür vorgesehenen Label
             else:
-                self.error_info_label.config(text=self.PoseError, fg= "red")
+                self.error_info_label.config(text=self.PoseError, fg="red")
                 self.stop_detection()
                 # Zeiten für gute/schlechte Haltung zurücksetzen
                 self.time_correct_pose = 0
@@ -203,16 +211,23 @@ class LandmarkDetectorApp:
         self.start_button.config(state=tk.DISABLED)
         self.stop_button.config(state=tk.NORMAL)
 
+        # Label "Kamera ausgerichtet" einblenden
+        self.KPI_pose_align_label.grid(row=0, column=2, sticky="nsew")  # Use sticky to expand label to fill the cell
+        self.KPI_frame.columnconfigure(2, weight=1)  # Make column 2 of the KPI frame expandable
+
         # Zeiten zurücksetzen
         self.time_correct_pose = 0
         self.time_incorrect_pose = 0
-
-        # Update the class property in UI
-        self.pose_score += 1
-        self.KPI_pose_score_label.config(text=f"Pose Score: {self.pose_score}") 
+        self.goodTime_from_start = 0
+        self.time_from_start = 0
 
     def stop_detection(self):
         self.detecting = False
         self.start_button.config(state=tk.NORMAL)
         self.stop_button.config(state=tk.DISABLED)
 
+        # Label "Kamera ausgerichtet" ausblenden
+        self.KPI_pose_align_label.grid_remove()
+        self.KPI_frame.columnconfigure(2, weight=0)
+
+        self.error_info_label.config(text="Der Haltungsassistent wurde gestoppt.", fg='black')
