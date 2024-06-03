@@ -103,7 +103,7 @@ class LandmarkDetectorApp:
         self.bottom_frame = tk.Frame(self.right_frame)
         self.bottom_frame.pack(fill='x')
 
-        self.entry = tk.Entry(self.bottom_frame, font=('Helvetica', 12), width=50)
+        self.entry = tk.Entry(self.bottom_frame, font=('Helvetica', 10), width=50)
         self.entry.pack(side=tk.LEFT, fill='x', expand=True)
         self.entry.bind("<Return>", self.add_message)
 
