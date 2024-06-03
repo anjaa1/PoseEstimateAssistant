@@ -1,6 +1,7 @@
+import threading
 import tkinter as tk
 import traceback
-from tkinter import Frame
+from tkinter import Frame, scrolledtext
 
 import cv2
 import mediapipe as mp
@@ -12,10 +13,11 @@ class LandmarkDetectorApp:
     pose_score = 0
     time_correct_pose = 13
 
-    def __init__(self, master, poseEstimation_model):
+    def __init__(self, master, poseEstimation_model, rasaClient):
         self.master = master
         self.master.title("Landmark Detector")
         self.poseEstimation_model = poseEstimation_model
+        self.rasaClient = rasaClient
 
         # Main frame for the whole app
         self.main_frame = Frame(self.master, padx=20, pady=20)
@@ -69,14 +71,19 @@ class LandmarkDetectorApp:
         self.detecting = False
         self.update()
 
-        self.chat_window = tk.Text(self.right_frame, wrap=tk.WORD, state=tk.DISABLED, bg='white', fg='black', padx=10, pady=10)
+        # Chat window configuration
+        self.chat_window = scrolledtext.ScrolledText(
+            self.right_frame, wrap=tk.WORD, state=tk.DISABLED, bg='#F5F5F5', fg='#333333', font=("Helvetica", 10), padx=10, pady=10
+        )
+        self.chat_window.tag_configure("right", justify='right', background="#DCF8C6", foreground="#333333", font=("Helvetica", 10), lmargin1=10, lmargin2=10, rmargin=10)
+        self.chat_window.tag_configure("left", justify='left', background="#FFFFFF", foreground="#333333", font=("Helvetica", 10), lmargin1=10, lmargin2=10, rmargin=10)
         self.chat_window.pack(expand=False, fill='both', padx=5, pady=5)
 
         # Create Frame for the entry and button at the bottom
         self.bottom_frame = tk.Frame(self.right_frame)
         self.bottom_frame.pack(fill='x', padx=5, pady=5)
 
-        self.entry = tk.Entry(self.bottom_frame, font=('Arial', 12), width=50)
+        self.entry = tk.Entry(self.bottom_frame, font=('Helvetica', 12), width=50)
         self.entry.pack(side=tk.LEFT, padx=5, pady=5, fill='x', expand=True)
         self.entry.bind("<Return>", self.add_message)
 
@@ -86,17 +93,29 @@ class LandmarkDetectorApp:
 
         # add an Initial message
         self.chat_window.config(state=tk.NORMAL)
-        self.chat_window.insert(tk.END, "Chatverlauf\n")
+        self.chat_window.insert(tk.END, "Ich bin ein Chatbot, der dir deine Fragen beantworten kann.\n")
         self.chat_window.config(state=tk.DISABLED)
 
     def add_message(self, event=None):
         message = self.entry.get()
         if message:
-            self.chat_window.config(state=tk.NORMAL)  # Enable editing to add the new message
-            self.chat_window.insert(tk.END, message + "\n")  # Insert the message at the end
-            self.chat_window.config(state=tk.DISABLED)  # Disable editing to prevent overwriting
-            self.chat_window.see(tk.END)  # Scroll to the end to show the latest message
-            self.entry.delete(0, tk.END)  # Clear the entry widget
+            self.display_message(message, "right")
+            threading.Thread(target=self.fetch_response, args=(message,)).start()
+
+    def fetch_response(self, message):
+        try:
+            response = self.rasaClient.send_message(message)
+            self.master.after(0, self.display_message, response, "left")
+        except Exception as e:
+            print("Error fetching response:", e)
+            traceback.print_exc()
+
+    def display_message(self, message, tag):
+        self.chat_window.config(state=tk.NORMAL)  # Enable editing to add the new message
+        self.chat_window.insert(tk.END, message + "\n", tag)  # Insert the message at the end
+        self.chat_window.config(state=tk.DISABLED)  # Disable editing to prevent overwriting
+        self.chat_window.see(tk.END)  # Scroll to the end to show the latest message
+        self.entry.delete(0, tk.END)  # Clear the entry widget
 
     def update(self):
         

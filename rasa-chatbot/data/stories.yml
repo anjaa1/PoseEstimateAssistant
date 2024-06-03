@@ -1,30 +1,59 @@
 version: "3.1"
 
 stories:
-
-- story: happy path
+- story: greet and goodbye
   steps:
   - intent: greet
   - action: utter_greet
-  - intent: mood_great
-  - action: utter_happy
-
-- story: sad path 1
-  steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: mood_unhappy
-  - action: utter_cheer_up
-  - action: utter_did_that_help
-  - intent: affirm
-  - action: utter_happy
-
-- story: sad path 2
-  steps:
-  - intent: greet
-  - action: utter_greet
-  - intent: mood_unhappy
-  - action: utter_cheer_up
-  - action: utter_did_that_help
-  - intent: deny
+  - intent: goodbye
   - action: utter_goodbye
+
+- story: start conversion and ask about app
+  steps:
+  - intent: greet
+  - action: utter_greet
+  - intent: ask_chatbot_about_functions
+  - action: utter_show_chatbot_function
+  - intent: ask_about_app
+  - action: utter_explain_app
+  - intent: ask_about_score
+  - action: utter_explain_score
+  - intent: ask_about_statistics
+  - action: utter_explain_statistics
+  - intent: goodbye
+  - action: utter_goodbye
+
+- story: ask about app
+  steps:
+  - intent: ask_about_app
+  - action: utter_explain_app
+  
+- story: ask about app functions
+  steps:
+  - intent: ask_about_function
+  - action: utter_explain_function
+
+- story: ask about scoring
+  steps:
+  - intent: ask_about_score
+  - action: utter_explain_score
+
+- story: ask about posture
+  steps:
+  - intent: ask_about_posture
+  - action: utter_explain_posture
+
+- story: ask about bot
+  steps:
+  - intent: ask_about_bot
+  - action: utter_explain_bot
+
+- story: ask about fitness
+  steps:
+  - intent: ask_about_fitness
+  - action: utter_explain_fitness
+
+- story: ask about statistics
+  steps:
+  - intent: ask_about_statistics
+  - action: utter_explain_statistics
