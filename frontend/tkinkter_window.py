@@ -93,7 +93,7 @@ class LandmarkDetectorApp:
 
         # add an Initial message
         self.chat_window.config(state=tk.NORMAL)
-        self.chat_window.insert(tk.END, "Chatverlauf\n")
+        self.chat_window.insert(tk.END, "Ich bin ein Chatbot, der dir deine Fragen beantworten kann.\n")
         self.chat_window.config(state=tk.DISABLED)
 
     def add_message(self, event=None):
