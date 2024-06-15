@@ -6,7 +6,6 @@ import cv2
 import mediapipe as mp
 from PIL import Image, ImageTk
 
-
 class PoseEstimation:
 
     # Variablen der Klasse PoseEstimation intialisieren
@@ -21,7 +20,6 @@ class PoseEstimation:
         self.pose = self.mp_pose.Pose()
         self.error = ""
         self.captureObject = captureObject
-        #self.videoFeedForHMI(captureObject, video)
 
     def __call__(self, captureObject, video):
         return self.videoFeedForHMI(captureObject, video)
@@ -31,13 +29,15 @@ class PoseEstimation:
         return m.sqrt((x2-x1)**2+(y2-y1)**2)
     
     # Die Funktion getAngle ermittelt den Winkel zwischen Halswirbelsäule und einer vertikalen Gerade
-    def getAngle(self, x1, y1, x2, y2):
+    def getAngle(self, x1, y1, x2, y2, mode=""):
         try:
             alpha = m.atan(abs(x2-x1)/abs(y2-y1)) # Winkel Alpha berechnen
             return int(180/m.pi) * alpha # Winkel Alpha wird von Radiant in Grad umgerechnet
         except ZeroDivisionError:
-            # Bei Division durch 0 ist Winkel 0
-            return 0
+            if mode == "lowerarm":
+                return 90 # Für den Lowerarm-Winkel ist Winkel 90°
+            else:
+                return 0 # Bei Division durch 0 ist Winkel 0°
 
     # Erfassen der Koordinaten der Körperhaltungspunkte 
     def getCoordinates(self, lm, Width, Heigth):
@@ -97,13 +97,12 @@ class PoseEstimation:
             Shoulder_Lx, Shoulder_Ly, Shoulder_Rx, Shoulder_Ry, Ear_Lx, Ear_Ly, Hip_Lx, Hip_Ly, Elbow_Lx, Elbow_Ly, Wrist_Lx, Wrist_Ly = self.getCoordinates(landmarks, Width, Height) 
 
             ############################################# Ausrichten der Kamera #############################################
-            #aligned = self.AlignCamera(Shoulder_Lx, Shoulder_Ly, Shoulder_Rx, Shoulder_Ry, video_rgb, Width)
             aligned = self.AlignCamera(Shoulder_Lx, Shoulder_Ly, Shoulder_Rx, Shoulder_Ry)
 
             ######################################### Berechne die Neigungswinkel ###########################################
             neck_inclination = self.getAngle(Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly)
             torso_inclination = self.getAngle(Hip_Lx, Hip_Ly, Shoulder_Lx, Shoulder_Ly)
-            lowerarm_inclination = self.getAngle(Elbow_Lx, Elbow_Ly, Wrist_Lx, Wrist_Ly)
+            lowerarm_inclination = self.getAngle(Elbow_Lx, Elbow_Ly, Wrist_Lx, Wrist_Ly, "lowerarm")
 
             ##################################### Einzeichnen der Punkte in das Video #######################################
             cv2.circle(video_rgb, (Shoulder_Lx, Shoulder_Ly), 7, (0, 255, 255), -1) # Zeichne Kreis in Farbe Gelb
@@ -117,10 +116,10 @@ class PoseEstimation:
             self.good_frames = 0
             self.bad_frames = 0
 
-            if neck_inclination < 20: # Gute Haltung -> Farbe Grün
+            if neck_inclination < 30: # Gute Haltung -> Farbe Grün
                 self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly, (127, 255, 0))
                 self.good_frames += 1
-            elif neck_inclination >= 20 and neck_inclination <= 40: # Mittelmäßige Haltung -> Farbe Orange
+            elif neck_inclination >= 30 and neck_inclination <= 40: # Mittelmäßige Haltung -> Farbe Orange
                 self.drawline(video_rgb, Shoulder_Lx, Shoulder_Ly, Ear_Lx, Ear_Ly, (255,165,0))
                 self.good_frames += 1
             else: # Schlechte Haltung -> Farbe Rot
@@ -150,14 +149,12 @@ class PoseEstimation:
                 self.drawline(video_rgb, Wrist_Lx, Wrist_Ly, Elbow_Lx, Elbow_Ly, (255, 0, 0))
                 self.bad_frames += 1
 
-            if self.good_frames > self.bad_frames:
+            if self.good_frames == 3:
                 correctPose = True
-                #self.good_time = ((1 / fps) * self.good_frames) # Berechne die Dauer der guten Haltung
                 self.good_time = (1 / fps)
                 self.bad_time = 0
             else:
                 correctPose = False
-                #self.bad_time =  ((1 / fps) * self.bad_frames) # Berechne die Dauer der schlechten Haltung
                 self.bad_time =  (1 / fps)
                 self.good_time = 0
             
